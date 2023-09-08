@@ -1,11 +1,38 @@
-from rest_framework import viewsets, generics
-from lessons.models import Lesson, Course
-from lessons.serializers import LessonSerializer, CourseSerializer
+from rest_framework import viewsets, generics, status
+from rest_framework.response import Response
+
+from lessons.models import Lesson, Course, Payments
+from lessons.serializers import LessonSerializer, LessonListSerializer, CourseSerializer, CourseCreateSerializer, \
+    LessonDetailSerializer, CourseDetailSerializer, PaymentsSerializer
 
 
 class CourseViewSet(viewsets.ModelViewSet):
-    serializer_class = CourseSerializer
     queryset = Course.objects.all()
+    default_serializer_class = CourseSerializer
+    serializers = {
+        "create": CourseSerializer,
+        "list": CourseSerializer,
+        "retrieve": CourseDetailSerializer,
+    }
+
+    def get_serializer_class(self):
+        return self.serializers.get(self.action, self.default_serializer_class)
+
+    # def get_queryset(self):
+    #     if self.request.user.has_perms(['course.view_course']):
+    #         return Course.objects.all()
+    #     return Course.objects.filter(user_course=self.request.user)
+
+    def perform_create(self, serializer):
+        new_obj = serializer.save()
+        new_obj.user_course = self.request.user
+        new_obj.save()
+
+    def perform_update(self, serializer):
+        updated_obj = serializer.save()
+        if not self.request.user.is_staff:
+            updated_obj.user_course = self.request.user
+        updated_obj.save()
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
@@ -13,19 +40,24 @@ class LessonCreateAPIView(generics.CreateAPIView):
 
 
 class LessonListAPIView(generics.ListAPIView):
-    serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
+    serializer_class = LessonListSerializer
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
-    serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
+    serializer_class = LessonDetailSerializer
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
-    serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
+
+
+class PaymentsViewSet(viewsets.ModelViewSet):
+    queryset = Payments.objects.all()
+    serializer_class = PaymentsSerializer
