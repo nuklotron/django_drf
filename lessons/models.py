@@ -7,7 +7,6 @@ class Course(models.Model):
     title = models.CharField(max_length=150, verbose_name='course')
     preview_img = models.ImageField(upload_to='course/', verbose_name='preview', **NULLABLE)
     description = models.TextField(verbose_name='description')
-    lessons = models.ManyToManyField('Lesson', verbose_name='lessons_in_course')
     user_course = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='user_created', **NULLABLE)
 
     def __str__(self):
@@ -46,7 +45,7 @@ class Payments(models.Model):
 
     user = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='user')
     date_of_payment = models.DateField(auto_now_add=True, verbose_name='date_of_payment')
-    payed_lesson = models.ManyToManyField('Lesson', verbose_name='payed_lesson', **NULLABLE)
-    payed_course = models.ManyToManyField('Course', verbose_name='payed_course', **NULLABLE)
+    payed_lesson = models.ForeignKey('Lesson', on_delete=models.SET_NULL, verbose_name='payed_lesson', **NULLABLE)
+    payed_course = models.ForeignKey('Course', on_delete=models.SET_NULL, verbose_name='payed_course', **NULLABLE)
     summ = models.IntegerField(verbose_name='summ')
     method_of_payment = models.CharField(max_length=15, choices=PAYMENTS_TYPE, verbose_name='method_of_payment')

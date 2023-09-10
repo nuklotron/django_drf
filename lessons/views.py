@@ -2,21 +2,16 @@ from rest_framework import viewsets, generics, status
 from rest_framework.response import Response
 
 from lessons.models import Lesson, Course, Payments
-from lessons.serializers import LessonSerializer, LessonListSerializer, CourseSerializer, CourseCreateSerializer, \
-    LessonDetailSerializer, CourseDetailSerializer, PaymentsSerializer
+from lessons.serializers import LessonSerializer, LessonListSerializer, CourseSerializer, \
+    LessonDetailSerializer, PaymentsSerializer
 
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
-    default_serializer_class = CourseSerializer
-    serializers = {
-        "create": CourseSerializer,
-        "list": CourseSerializer,
-        "retrieve": CourseDetailSerializer,
-    }
+    serializer_class = CourseSerializer
 
-    def get_serializer_class(self):
-        return self.serializers.get(self.action, self.default_serializer_class)
+    # def get_serializer_class(self):
+    #     return self.serializers.get(self.action, self.default_serializer_class)
 
     # def get_queryset(self):
     #     if self.request.user.has_perms(['course.view_course']):
@@ -25,13 +20,13 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         new_obj = serializer.save()
-        new_obj.user_course = self.request.user
+        # new_obj.user_course = self.request.user
         new_obj.save()
 
     def perform_update(self, serializer):
         updated_obj = serializer.save()
-        if not self.request.user.is_staff:
-            updated_obj.user_course = self.request.user
+        # if not self.request.user.is_staff:
+        #     updated_obj.user_course = self.request.user
         updated_obj.save()
 
 

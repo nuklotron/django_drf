@@ -14,38 +14,7 @@ class LessonSerializer(serializers.ModelSerializer):
 
 class CourseSerializer(serializers.ModelSerializer):
     lessons_in_course = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Course
-        fields = ('id', 'title', 'description', 'lessons_in_course',)
-
-    def get_lessons_in_course(self, instance):
-        return instance.lesson_set.all().count()
-
-
-class CourseCreateSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Course
-        fields = '__all__'
-
-    def create(self, validated_data):
-        print(validated_data)
-        lesson_data = validated_data.pop('lessons')
-        courses = Course.objects.create(**validated_data)
-        for data in lesson_data:
-            lesson_object, flag = Lesson.objects.get_or_create(title=data['title'],
-                                                               defaults={
-                                                                   'description': data['description'],
-                                                                   'video_url': data['video_url']
-                                                               })
-            courses.lessons.add(lesson_object)
-        return courses
-
-
-class CourseDetailSerializer(serializers.ModelSerializer):
-    lessons_in_course = serializers.SerializerMethodField()
-    lessons = LessonSerializer(source='lesson_set', many=True, required=False)
+    lessons = LessonSerializer(source='lesson_set', many=True, read_only=True)
 
     class Meta:
         model = Course
@@ -76,6 +45,3 @@ class PaymentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payments
         fields = '__all__'
-
-
-
