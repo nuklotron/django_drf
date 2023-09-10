@@ -1,6 +1,6 @@
-from rest_framework import viewsets, generics, status
-from rest_framework.response import Response
-
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, generics
+from rest_framework.filters import OrderingFilter
 from lessons.models import Lesson, Course, Payments
 from lessons.serializers import LessonSerializer, LessonListSerializer, CourseSerializer, \
     LessonDetailSerializer, PaymentsSerializer
@@ -53,6 +53,30 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
 
 
-class PaymentsViewSet(viewsets.ModelViewSet):
+class PaymentsCreateAPIView(generics.CreateAPIView):
+    serializer_class = PaymentsSerializer
+
+
+class PaymentsListAPIView(generics.ListAPIView):
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ('payed_lesson', 'payed_course', 'method_of_payment',)
+    ordering_fields = ('date_of_payment',)
+
+
+class PaymentsRetrieveAPIView(generics.RetrieveAPIView):
+    queryset = Payments.objects.all()
+    serializer_class = PaymentsSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ('payed_lesson', 'payed_course', 'method_of_payment',)
+    ordering_fields = ('date_of_payment',)
+
+
+class PaymentsUpdateAPIView(generics.UpdateAPIView):
+    queryset = Payments.objects.all()
+    serializer_class = PaymentsSerializer
+
+
+class PaymentsDestroyAPIView(generics.DestroyAPIView):
+    queryset = Payments.objects.all()
