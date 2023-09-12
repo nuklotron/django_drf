@@ -24,6 +24,7 @@ class Lesson(models.Model):
     description = models.TextField(verbose_name='description')
     video_url = models.URLField(verbose_name='video url', **NULLABLE)
     courses = models.ForeignKey('Course', on_delete=models.SET_NULL, verbose_name='course', **NULLABLE)
+    users_lesson = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='user_created', **NULLABLE)
 
     def __str__(self):
         return f'{self.title}'
@@ -49,3 +50,11 @@ class Payments(models.Model):
     payed_course = models.ForeignKey('Course', on_delete=models.SET_NULL, verbose_name='payed_course', **NULLABLE)
     summ = models.IntegerField(verbose_name='summ')
     method_of_payment = models.CharField(max_length=15, choices=PAYMENTS_TYPE, verbose_name='method_of_payment')
+
+    def __str__(self):
+        return f'{self.user}'
+
+    class Meta:
+        verbose_name = 'payment'
+        verbose_name_plural = 'payments'
+        ordering = ('user',)

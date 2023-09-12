@@ -1,6 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, generics
 from rest_framework.filters import OrderingFilter
+from rest_framework.permissions import IsAuthenticated
 from lessons.models import Lesson, Course, Payments
 from lessons.serializers import LessonSerializer, LessonListSerializer, CourseSerializer, \
     LessonDetailSerializer, PaymentsSerializer
@@ -9,57 +10,78 @@ from lessons.serializers import LessonSerializer, LessonListSerializer, CourseSe
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+    permission_classes = [IsAuthenticated]
 
-    # def get_serializer_class(self):
-    #     return self.serializers.get(self.action, self.default_serializer_class)
-
-    # def get_queryset(self):
-    #     if self.request.user.has_perms(['course.view_course']):
-    #         return Course.objects.all()
-    #     return Course.objects.filter(user_course=self.request.user)
+    def get_queryset(self):
+        if not self.request.user.groups.filter(name='moderators'):
+            return Course.objects.filter(user_course=self.request.user)
+        return Course.objects.all()
 
     def perform_create(self, serializer):
         new_obj = serializer.save()
-        # new_obj.user_course = self.request.user
+        new_obj.user_course = self.request.user
         new_obj.save()
 
     def perform_update(self, serializer):
         updated_obj = serializer.save()
-        # if not self.request.user.is_staff:
-        #     updated_obj.user_course = self.request.user
+        if not self.request.user.is_staff:
+            updated_obj.user_course = self.request.user
         updated_obj.save()
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
     serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        new_obj = serializer.save()
+        new_obj.user_course = self.request.user
+        new_obj.save()
 
 
 class LessonListAPIView(generics.ListAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        if not self.request.user.groups.filter(name='moderators'):
+            return Lesson.objects.filter(users_lesson=self.request.user)
+        return Lesson.objects.all()
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonDetailSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_update(self, serializer):
+        updated_obj = serializer.save()
+        if not self.request.user.is_staff:
+            updated_obj.user_course = self.request.user
+        updated_obj.save()
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
+    permission_classes = [IsAuthenticated]
 
 
 class PaymentsCreateAPIView(generics.CreateAPIView):
     serializer_class = PaymentsSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class PaymentsListAPIView(generics.ListAPIView):
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ('payed_lesson', 'payed_course', 'method_of_payment',)
     ordering_fields = ('date_of_payment',)
@@ -68,6 +90,7 @@ class PaymentsListAPIView(generics.ListAPIView):
 class PaymentsRetrieveAPIView(generics.RetrieveAPIView):
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ('payed_lesson', 'payed_course', 'method_of_payment',)
     ordering_fields = ('date_of_payment',)
@@ -76,7 +99,9 @@ class PaymentsRetrieveAPIView(generics.RetrieveAPIView):
 class PaymentsUpdateAPIView(generics.UpdateAPIView):
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class PaymentsDestroyAPIView(generics.DestroyAPIView):
     queryset = Payments.objects.all()
+    permission_classes = [IsAuthenticated]
