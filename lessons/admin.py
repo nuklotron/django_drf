@@ -8,8 +8,8 @@ from lessons.models import Course, Lesson, Payments
 class CourseAdmin(admin.ModelAdmin):
 
     list_display = ('title',)
-    list_filter = ('title', 'user_course',)
-    search_fields = ('title', 'user_course',)
+    list_filter = ('title', 'owner',)
+    search_fields = ('title', 'owner',)
 
 
 @admin.register(Lesson)

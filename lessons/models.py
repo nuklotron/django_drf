@@ -7,7 +7,7 @@ class Course(models.Model):
     title = models.CharField(max_length=150, verbose_name='course')
     preview_img = models.ImageField(upload_to='course/', verbose_name='preview', **NULLABLE)
     description = models.TextField(verbose_name='description')
-    user_course = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='user_created', **NULLABLE)
+    owner = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='course_owner', **NULLABLE)
 
     def __str__(self):
         return f'{self.title}'
@@ -24,7 +24,7 @@ class Lesson(models.Model):
     description = models.TextField(verbose_name='description')
     video_url = models.URLField(verbose_name='video url', **NULLABLE)
     courses = models.ForeignKey('Course', on_delete=models.SET_NULL, verbose_name='course', **NULLABLE)
-    users_lesson = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='user_created', **NULLABLE)
+    owner = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='lesson_owner', **NULLABLE)
 
     def __str__(self):
         return f'{self.title}'

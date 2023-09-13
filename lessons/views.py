@@ -3,6 +3,7 @@ from rest_framework import viewsets, generics
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from lessons.models import Lesson, Course, Payments
+from lessons.permissions import IsModerator, IsOwner
 from lessons.serializers import LessonSerializer, LessonListSerializer, CourseSerializer, \
     LessonDetailSerializer, PaymentsSerializer
 
@@ -10,22 +11,22 @@ from lessons.serializers import LessonSerializer, LessonListSerializer, CourseSe
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsModerator | IsOwner]
 
     def get_queryset(self):
         if not self.request.user.groups.filter(name='moderators'):
-            return Course.objects.filter(user_course=self.request.user)
+            return Course.objects.filter(owner=self.request.user)
         return Course.objects.all()
 
     def perform_create(self, serializer):
         new_obj = serializer.save()
-        new_obj.user_course = self.request.user
+        new_obj.owner = self.request.user
         new_obj.save()
 
     def perform_update(self, serializer):
         updated_obj = serializer.save()
         if not self.request.user.is_staff:
-            updated_obj.user_course = self.request.user
+            updated_obj.owner = self.request.user
         updated_obj.save()
 
 
@@ -35,7 +36,7 @@ class LessonCreateAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         new_obj = serializer.save()
-        new_obj.user_course = self.request.user
+        new_obj.owner = self.request.user
         new_obj.save()
 
 
@@ -46,7 +47,7 @@ class LessonListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         if not self.request.user.groups.filter(name='moderators'):
-            return Lesson.objects.filter(users_lesson=self.request.user)
+            return Lesson.objects.filter(owner=self.request.user)
         return Lesson.objects.all()
 
 
@@ -59,12 +60,12 @@ class LessonRetrieveAPIView(generics.RetrieveAPIView):
 class LessonUpdateAPIView(generics.UpdateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsModerator | IsOwner]
 
     def perform_update(self, serializer):
         updated_obj = serializer.save()
         if not self.request.user.is_staff:
-            updated_obj.user_course = self.request.user
+            updated_obj.owner = self.request.user
         updated_obj.save()
 
 
