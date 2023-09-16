@@ -58,3 +58,19 @@ class Payments(models.Model):
         verbose_name = 'payment'
         verbose_name_plural = 'payments'
         ordering = ('user',)
+
+
+class CourseSubscriptions(models.Model):
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, verbose_name='course')
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='user')
+    status = models.BooleanField(verbose_name='status')
+
+    def __str__(self):
+        if self.status:
+            return f'{self.user} is subscribed to {self.course}'
+        else:
+            return f'{self.user} is`nt subscribed to {self.course}'
+
+    class Meta:
+        verbose_name = 'subscription status'
+        verbose_name_plural = 'subscriptions status'

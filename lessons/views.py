@@ -2,16 +2,18 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, generics
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
-from lessons.models import Lesson, Course, Payments
-from lessons.permissions import IsModerator, IsOwner
+from lessons.models import Lesson, Course, Payments, CourseSubscriptions
+from lessons.paginators import CoursePaginator
+from lessons.permissions import IsModerator, IsOwner, IsSuper
 from lessons.serializers import LessonSerializer, LessonListSerializer, CourseSerializer, \
-    LessonDetailSerializer, PaymentsSerializer
+    LessonDetailSerializer, PaymentsSerializer, CourseSubscriptionsSerializer
 
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    permission_classes = [IsAuthenticated, IsModerator | IsOwner]
+    permission_classes = [IsAuthenticated, IsModerator | IsOwner | IsSuper]
+    pagination_class = CoursePaginator
 
     def get_queryset(self):
         if not self.request.user.groups.filter(name='moderators'):
@@ -60,7 +62,7 @@ class LessonRetrieveAPIView(generics.RetrieveAPIView):
 class LessonUpdateAPIView(generics.UpdateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated, IsModerator | IsOwner]
+    permission_classes = [IsAuthenticated, IsModerator | IsOwner | IsSuper]
 
     def perform_update(self, serializer):
         updated_obj = serializer.save()
@@ -71,7 +73,7 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsModerator | IsOwner | IsSuper]
 
 
 class PaymentsCreateAPIView(generics.CreateAPIView):
@@ -105,4 +107,16 @@ class PaymentsUpdateAPIView(generics.UpdateAPIView):
 
 class PaymentsDestroyAPIView(generics.DestroyAPIView):
     queryset = Payments.objects.all()
+    permission_classes = [IsAuthenticated]
+
+
+class CourseSubscriptionsCreateAPIView(generics.CreateAPIView):
+    serializer_class = CourseSubscriptionsSerializer
+    queryset = CourseSubscriptions.objects.all()
+    permission_classes = [IsAuthenticated]
+
+
+class CourseSubscriptionsUpdateView(generics.UpdateAPIView):
+    serializer_class = CourseSubscriptionsSerializer
+    queryset = CourseSubscriptions.objects.all()
     permission_classes = [IsAuthenticated]
