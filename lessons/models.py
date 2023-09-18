@@ -8,6 +8,7 @@ class Course(models.Model):
     preview_img = models.ImageField(upload_to='course/', verbose_name='preview', **NULLABLE)
     description = models.TextField(verbose_name='description')
     owner = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='course_owner', **NULLABLE)
+    price = models.IntegerField(default=0, verbose_name='price')
 
     def __str__(self):
         return f'{self.title}'
@@ -37,11 +38,11 @@ class Lesson(models.Model):
 
 class Payments(models.Model):
     CASH = 'cash'
-    REMITTANCE = 'remittance'
+    CARD = 'card'
 
     PAYMENTS_TYPE = (
         (CASH, 'Cash'),
-        (REMITTANCE, 'Remittance')
+        (CARD, 'Card')
     )
 
     user = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='user')
@@ -50,6 +51,8 @@ class Payments(models.Model):
     payed_course = models.ForeignKey('Course', on_delete=models.SET_NULL, verbose_name='payed_course', **NULLABLE)
     summ = models.IntegerField(verbose_name='summ')
     method_of_payment = models.CharField(max_length=15, choices=PAYMENTS_TYPE, verbose_name='method_of_payment')
+    payment_id = models.CharField(max_length=100, verbose_name='stipe_payment_id', **NULLABLE)
+    payment_status = models.CharField(max_length=100, verbose_name='payment_status', **NULLABLE)
 
     def __str__(self):
         return f'{self.user}'
