@@ -48,6 +48,8 @@ class LessonListSerializer(serializers.ModelSerializer):
 
 
 class PaymentsSerializer(serializers.ModelSerializer):
+    user = SlugRelatedField(slug_field='email', queryset=User.objects.all())
+    payed_course = SlugRelatedField(slug_field='title', queryset=Course.objects.all())
 
     class Meta:
         model = Payments
@@ -55,6 +57,8 @@ class PaymentsSerializer(serializers.ModelSerializer):
 
 
 class PaymentsCreateSerializer(serializers.ModelSerializer):
+    user = SlugRelatedField(slug_field='email', queryset=User.objects.all())
+    payed_course = SlugRelatedField(slug_field='title', queryset=Course.objects.all())
     payment_url = serializers.SerializerMethodField()
 
     class Meta:
