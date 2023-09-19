@@ -47,7 +47,6 @@ class Payments(models.Model):
 
     user = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='user')
     date_of_payment = models.DateField(auto_now_add=True, verbose_name='date_of_payment')
-    payed_lesson = models.ForeignKey('Lesson', on_delete=models.SET_NULL, verbose_name='payed_lesson', **NULLABLE)
     payed_course = models.ForeignKey('Course', on_delete=models.SET_NULL, verbose_name='payed_course', **NULLABLE)
     summ = models.IntegerField(verbose_name='summ')
     method_of_payment = models.CharField(max_length=15, choices=PAYMENTS_TYPE, verbose_name='method_of_payment')

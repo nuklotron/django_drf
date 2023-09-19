@@ -8,8 +8,8 @@ from lessons.models import Lesson, Course, Payments, CourseSubscriptions
 from lessons.paginators import CoursePaginator
 from lessons.permissions import IsModerator, IsOwner, IsSuper
 from lessons.serializers import LessonSerializer, LessonListSerializer, CourseSerializer, \
-    LessonDetailSerializer, PaymentsSerializer, CourseSubscriptionsSerializer
-from lessons.services import get_stripe, get_status_of_payment
+    LessonDetailSerializer, PaymentsSerializer, CourseSubscriptionsSerializer, PaymentsCreateSerializer
+from lessons.services import get_status_of_payment, get_stripe
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -38,7 +38,6 @@ class CourseViewSet(viewsets.ModelViewSet):
         new_obj = serializer.save()
         new_obj.owner = self.request.user
         new_obj.save()
-
 
     def perform_update(self, serializer):
         updated_obj = serializer.save()
@@ -123,7 +122,7 @@ class PaymentsCreateAPIView(generics.CreateAPIView):
     Working with 'services.py', initializing Stripe service, creating Payment URL
     and Payments Object
     """
-    serializer_class = PaymentsSerializer
+    serializer_class = PaymentsCreateSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
@@ -133,9 +132,9 @@ class PaymentsCreateAPIView(generics.CreateAPIView):
             if self.request.user.is_authenticated:
                 payment = serializer.save(user=self.request.user)
                 payment.session = get_stripe(course, self.request.user)
-                status = get_status_of_payment(payment.session)
-                serializer.save(payment_id=payment.session, payment_status=status.get('status'))
+                serializer.save(payment_id=payment.session.id, payment_status="created")
                 payment.save()
+
         except serializers.ValidationError as er:
             print(f'There was an error in PaymentsCreateView - {er}')
 
@@ -149,7 +148,7 @@ class PaymentsListAPIView(generics.ListAPIView):
     serializer_class = PaymentsSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_fields = ('payed_lesson', 'payed_course', 'method_of_payment',)
+    filterset_fields = ('payed_course', 'method_of_payment',)
     ordering_fields = ('date_of_payment',)
 
 
@@ -162,7 +161,7 @@ class PaymentsRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = PaymentsSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_fields = ('payed_lesson', 'payed_course', 'method_of_payment',)
+    filterset_fields = ('payed_course', 'method_of_payment',)
     ordering_fields = ('date_of_payment',)
 
 

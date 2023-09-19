@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
+stripe.api_key = os.getenv("STRIPE_API")
 
 
 def get_stripe(course, user):
-    stripe.api_key = os.getenv("STRIPE_API")
 
     starter_subscription = stripe.Product.create(
         name=course.title,
@@ -37,7 +37,7 @@ def get_stripe(course, user):
     print(f"Success! payment_retrieve {payment_retrieve.id}")
     print(f"Success! payment_link {payment_link.url}")
 
-    return payment_retrieve.id
+    return payment_link
 
 
 def get_status_of_payment(client_secret):

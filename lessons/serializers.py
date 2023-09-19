@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
 from lessons.models import Lesson, Course, Payments, CourseSubscriptions
+from lessons.services import get_stripe
 from lessons.validators import UrlValidator
 from users.models import User
 
@@ -51,6 +52,17 @@ class PaymentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payments
         fields = '__all__'
+
+
+class PaymentsCreateSerializer(serializers.ModelSerializer):
+    payment_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Payments
+        fields = '__all__'
+
+    def get_payment_url(self, instance):
+        return get_stripe(instance.payed_course, instance.user).url
 
 
 class CourseSubscriptionsSerializer(serializers.ModelSerializer):
