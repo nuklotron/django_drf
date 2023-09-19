@@ -32,7 +32,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         if moderators or super_user:
             return self.queryset
         else:
-            return Course.objects.filter(owner=owner)
+            return Course.objects.filter(owner=owner.pk)
 
     def perform_create(self, serializer):
         new_obj = serializer.save()
