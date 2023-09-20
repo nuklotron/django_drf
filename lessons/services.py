@@ -2,48 +2,48 @@ import stripe
 import os
 from dotenv import load_dotenv
 
-
 load_dotenv()
 stripe.api_key = os.getenv("STRIPE_API")
 
 
 def get_stripe(course, user):
+    product_create = stripe.Product.create(name=course.title)
 
-    starter_subscription = stripe.Product.create(
-        name=course.title,
-    )
-
-    starter_subscription_price = stripe.Price.create(
+    price_create = stripe.Price.create(
+        product=product_create.id,
         unit_amount=course.price,
-        currency="eur",
-        recurring={"interval": "month"},
-        product=starter_subscription.id,
-    )
-
-    payment_create = stripe.PaymentIntent.create(
-        amount=starter_subscription_price.unit_amount,
         currency="usd",
-        receipt_email=user.email,
-        payment_method_types=['card'],
     )
 
-    payment_retrieve = stripe.PaymentIntent.retrieve(
-        payment_create.id,
+    checkout_session = stripe.checkout.Session.create(
+        line_items=[
+            {
+                # Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+                'price': price_create,
+                'quantity': 1,
+            },
+        ],
+        mode='payment',
+        success_url='http://127.0.0.1:8000/admin/',
+        customer_email=user.email
     )
-    payment_link = stripe.PaymentLink.create(line_items=[{"price": starter_subscription_price.id, "quantity": 1}])
 
     # Save these identifiers
-    print(f"Success! payment_create {payment_create.id}")
-    print(f"Success! payment_retrieve {payment_retrieve.id}")
-    print(f"Success! payment_link {payment_link.url}")
+    print(f"Success! checkout_session {checkout_session.id}")
 
-    return payment_link
+    return_data = {
+        "payment_id": checkout_session.id,
+        "price_id": checkout_session.id,
+        "payment_url": checkout_session.url
+    }
+
+    return return_data
+
+
+def get_payment_url(payment_data):
+    return payment_data.session.get('payment_url')
 
 
 def get_status_of_payment(client_secret):
-
-    get_status = stripe.PaymentIntent.retrieve(
-        client_secret,
-    )
-
+    get_status = stripe.checkout.Session.retrieve(client_secret)
     return get_status

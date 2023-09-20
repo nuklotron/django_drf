@@ -1,5 +1,6 @@
 import json
 
+from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, generics, serializers
 from rest_framework.filters import OrderingFilter
@@ -132,7 +133,7 @@ class PaymentsCreateAPIView(generics.CreateAPIView):
             if self.request.user.is_authenticated:
                 payment = serializer.save(user=self.request.user)
                 payment.session = get_stripe(course, self.request.user)
-                serializer.save(payment_id=payment.session.id, payment_status="created")
+                serializer.save(payment_status="created")
                 payment.save()
 
         except serializers.ValidationError as er:
@@ -202,3 +203,10 @@ class CourseSubscriptionsUpdateAPIView(generics.UpdateAPIView):
     serializer_class = CourseSubscriptionsSerializer
     queryset = CourseSubscriptions.objects.all()
     permission_classes = [IsAuthenticated]
+
+
+def payments_status_update(request):
+    payments = Payments.objects.filter(payment_status='created')
+    for payment in payments:
+        pass
+    return HttpResponse()

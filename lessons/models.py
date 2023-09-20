@@ -50,7 +50,6 @@ class Payments(models.Model):
     payed_course = models.ForeignKey('Course', on_delete=models.SET_NULL, verbose_name='payed_course', **NULLABLE)
     summ = models.IntegerField(verbose_name='summ')
     method_of_payment = models.CharField(max_length=15, choices=PAYMENTS_TYPE, verbose_name='method_of_payment')
-    payment_id = models.CharField(max_length=100, verbose_name='stipe_payment_id', **NULLABLE)
     payment_status = models.CharField(max_length=100, verbose_name='payment_status', **NULLABLE)
 
     def __str__(self):
