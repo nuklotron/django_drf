@@ -23,6 +23,6 @@ class LessonAdmin(admin.ModelAdmin):
 @admin.register(Payments)
 class PaymentsAdmin(admin.ModelAdmin):
 
-    list_display = ('user', 'method_of_payment',)
-    list_filter = ('user', 'method_of_payment',)
-    search_fields = ('user', 'method_of_payment',)
+    list_display = ('user', 'date_of_payment', 'payment_status',)
+    list_filter = ('user', 'payment_status',)
+    search_fields = ('user', 'payment_status',)

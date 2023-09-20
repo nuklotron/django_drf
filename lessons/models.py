@@ -51,9 +51,10 @@ class Payments(models.Model):
     summ = models.IntegerField(verbose_name='summ')
     method_of_payment = models.CharField(max_length=15, choices=PAYMENTS_TYPE, verbose_name='method_of_payment')
     payment_status = models.CharField(max_length=100, verbose_name='payment_status', **NULLABLE)
+    payment_id = models.CharField(max_length=100, verbose_name='payment_id', **NULLABLE)
 
     def __str__(self):
-        return f'{self.user}'
+        return f'{self.payment_id}'
 
     class Meta:
         verbose_name = 'payment'

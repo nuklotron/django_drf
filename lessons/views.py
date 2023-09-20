@@ -208,5 +208,10 @@ class CourseSubscriptionsUpdateAPIView(generics.UpdateAPIView):
 def payments_status_update(request):
     payments = Payments.objects.filter(payment_status='created')
     for payment in payments:
-        pass
+        if payment:
+            check_status = get_status_of_payment(payment.payment_id)
+            status = check_status.get('status')
+            if status != 'open':
+                payment.payment_status = status
+                payment.save()
     return HttpResponse()

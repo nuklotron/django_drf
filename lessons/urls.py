@@ -28,7 +28,7 @@ urlpatterns = [
     path('payments/<int:pk>/', PaymentsRetrieveAPIView.as_view(), name='payments_detail'),
     path('payments/update/<int:pk>/', PaymentsUpdateAPIView.as_view(), name='payments_update'),
     path('payments/delete/<int:pk>/', PaymentsDestroyAPIView.as_view(), name='payments_delete'),
-    path('payments/status/', payments_status_update, name='status_update'),
+    path('payments/status/', payments_status_update, name='payments_status_update'),
 
     path('subscriptions/create/', CourseSubscriptionsCreateAPIView.as_view(), name='subscription_create'),
     path('subscriptions/update/<int:pk>/', CourseSubscriptionsUpdateAPIView.as_view(), name='subscription_update'),
