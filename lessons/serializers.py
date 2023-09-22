@@ -70,6 +70,7 @@ class PaymentsCreateSerializer(serializers.ModelSerializer):
 
 
 class CourseSubscriptionsSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = CourseSubscriptions
         fields = "__all__"

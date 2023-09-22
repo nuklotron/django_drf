@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_yasg',
     'corsheaders',
+    'django_celery_beat',
 
     'users',
     'lessons',
@@ -176,3 +177,47 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = False
+
+# Настройки для Celery
+
+# URL-адрес брокера сообщений
+CELERY_BROKER_URL = 'redis://localhost:6379/0' # Например, Redis, который по умолчанию работает на порту 6379
+
+# URL-адрес брокера результатов, также Redis
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+# Часовой пояс для работы Celery
+CELERY_TIMEZONE = "Europe/Moscow"
+
+# Флаг отслеживания выполнения задач
+CELERY_TASK_TRACK_STARTED = True
+
+# Максимальное время на выполнение задачи
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
+
+# Установка расписания Celery
+CELERY_BEAT_SCHEDULE = {
+    'payment_status_updater': {
+        'task': 'lessons.tasks.payments_status_update',  # Путь к задаче
+        'schedule': 10.0,  # Расписание выполнения задачи
+    },
+    'user_last_login_check': {
+        'task': 'lessons.tasks.user_last_login_check',  # Путь к задаче
+        'schedule': 60.0,  # Расписание выполнения задачи
+    },
+}
+
+# для отправки email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+
+EMAIL_HOST = 'smtp.mailgun.org'
+EMAIL_HOST_USER = os.getenv('MAILGUN_USER')
+EMAIL_HOST_PASSWORD = os.getenv('MAILGUN_PASS')
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+SERVER_EMAIL = EMAIL_HOST_USER

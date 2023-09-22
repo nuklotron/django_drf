@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from lessons.models import Course, Lesson, Payments
+from lessons.models import Course, Lesson, Payments, CourseSubscriptions
 
 
 @admin.register(Course)
@@ -26,3 +26,11 @@ class PaymentsAdmin(admin.ModelAdmin):
     list_display = ('user', 'date_of_payment', 'payment_status',)
     list_filter = ('user', 'payment_status',)
     search_fields = ('user', 'payment_status',)
+
+
+@admin.register(CourseSubscriptions)
+class CourseSubscriptionsAdmin(admin.ModelAdmin):
+
+    list_display = ('course', 'user', 'status',)
+    list_filter = ('course', 'user', 'status',)
+    search_fields = ('course', 'user', 'status',)

@@ -71,7 +71,7 @@ class CourseSubscriptions(models.Model):
         if self.status:
             return f'{self.user} is subscribed to {self.course}'
         else:
-            return f'{self.user} is`nt subscribed to {self.course}'
+            return f"{self.user} isn't subscribed to {self.course}"
 
     class Meta:
         verbose_name = 'subscription status'

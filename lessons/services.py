@@ -2,6 +2,8 @@ import stripe
 import os
 from dotenv import load_dotenv
 
+from users.models import User
+
 load_dotenv()
 stripe.api_key = os.getenv("STRIPE_API")
 

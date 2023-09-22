@@ -1,6 +1,3 @@
-import json
-
-from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, generics, serializers
 from rest_framework.filters import OrderingFilter
@@ -10,7 +7,8 @@ from lessons.paginators import CoursePaginator
 from lessons.permissions import IsModerator, IsOwner, IsSuper
 from lessons.serializers import LessonSerializer, LessonListSerializer, CourseSerializer, \
     LessonDetailSerializer, PaymentsSerializer, CourseSubscriptionsSerializer, PaymentsCreateSerializer
-from lessons.services import get_status_of_payment, get_stripe
+from lessons.services import get_stripe
+from lessons.tasks import send_subscription
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -129,11 +127,13 @@ class PaymentsCreateAPIView(generics.CreateAPIView):
     def perform_create(self, serializer):
 
         course = serializer.validated_data.get('payed_course')
+
         try:
             if self.request.user.is_authenticated:
                 payment = serializer.save(user=self.request.user)
                 payment.session = get_stripe(course, self.request.user)
-                serializer.save(payment_status="created")
+                status = payment.session.get('payment_id')
+                serializer.save(payment_status="created", payment_id=status)
                 payment.save()
 
         except serializers.ValidationError as er:
@@ -189,10 +189,16 @@ class CourseSubscriptionsCreateAPIView(generics.CreateAPIView):
     """
     CreateAPIView for CourseSubscriptions model.
     Having permissions - IsAuthenticated.
+    When new subscription created email notification would be sent
     """
     serializer_class = CourseSubscriptionsSerializer
     queryset = CourseSubscriptions.objects.all()
     permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        subscription = serializer.save(user=self.request.user)
+        send_subscription.delay(self.request.user.id)
+        subscription.save()
 
 
 class CourseSubscriptionsUpdateAPIView(generics.UpdateAPIView):
@@ -203,15 +209,3 @@ class CourseSubscriptionsUpdateAPIView(generics.UpdateAPIView):
     serializer_class = CourseSubscriptionsSerializer
     queryset = CourseSubscriptions.objects.all()
     permission_classes = [IsAuthenticated]
-
-
-def payments_status_update(request):
-    payments = Payments.objects.filter(payment_status='created')
-    for payment in payments:
-        if payment:
-            check_status = get_status_of_payment(payment.payment_id)
-            status = check_status.get('status')
-            if status != 'open':
-                payment.payment_status = status
-                payment.save()
-    return HttpResponse()
