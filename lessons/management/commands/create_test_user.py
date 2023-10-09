@@ -6,12 +6,12 @@ from users.models import User
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         user = User.objects.create(
-            email='test@test.com',
-            first_name='Test',
-            last_name='Testov',
-            is_staff=False,
-            is_superuser=False
+            email='admin@admin.com',
+            first_name='Admin',
+            last_name='Adminov',
+            is_staff=True,
+            is_superuser=True
         )
 
-        user.set_password('Test')
+        user.set_password('admin')
         user.save()

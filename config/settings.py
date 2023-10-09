@@ -93,7 +93,7 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': 12345,
         'PORT': 5432,
-        'HOST': '127.0.0.1'
+        'HOST': 'db'
     }
 }
 
@@ -181,10 +181,10 @@ CORS_ALLOW_ALL_ORIGINS = False
 # Настройки для Celery
 
 # URL-адрес брокера сообщений
-CELERY_BROKER_URL = 'redis://localhost:6379/0' # Например, Redis, который по умолчанию работает на порту 6379
+CELERY_BROKER_URL = 'redis://redis:6379/0'  # Например, Redis, который по умолчанию работает на порту 6379
 
 # URL-адрес брокера результатов, также Redis
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
 # Часовой пояс для работы Celery
 CELERY_TIMEZONE = "Europe/Moscow"
@@ -201,7 +201,7 @@ CELERY_TASK_EAGER_PROPAGATES = True
 CELERY_BEAT_SCHEDULE = {
     'payment_status_updater': {
         'task': 'lessons.tasks.payments_status_update',  # Путь к задаче
-        'schedule': 10.0,  # Расписание выполнения задачи
+        'schedule': 60.0,  # Расписание выполнения задачи
     },
     'user_last_login_check': {
         'task': 'lessons.tasks.user_last_login_check',  # Путь к задаче
